@@ -1,133 +1,62 @@
-import { useEffect, useState } from "react";
-import { SuscribeImage, CloseButton as Close } from "../../assets";
-import { obtenerNoticias } from "./fakeRest";
-import {
-  CloseButton,
-  TarjetaModal,
-  ContenedorModal,
-  DescripcionModal,
-  ImagenModal,
-  TituloModal,
-  TarjetaNoticia,
-  FechaTarjetaNoticia,
-  DescripcionTarjetaNoticia,
-  ImagenTarjetaNoticia,
-  TituloTarjetaNoticia,
-  ContenedorNoticias,
-  ListaNoticias,
-  TituloNoticias,
-  BotonLectura,
-  BotonSuscribir,
-  CotenedorTexto,
-} from "./styled";
+import React, { useEffect, useState } from "react";
+import * as Styled from "./styled";
+import TarjetaNoticia from "./TarjetaNoticia";
+import Modal from "./Modal";
+import { INoticiasNormalizadas } from "./types";
+import informacion from "./Informacion";
 
-export interface INoticiasNormalizadas {
-  id: number;
-  titulo: string;
-  descripcion: string;
-  fecha: number | string;
-  esPremium: boolean;
-  imagen: string;
-  descripcionCorta?: string;
-}
-
+// Componente funcional Noticias
 const Noticias = () => {
+  // Estado local para almacenar las noticias y el estado del modal
   const [noticias, setNoticias] = useState<INoticiasNormalizadas[]>([]);
   const [modal, setModal] = useState<INoticiasNormalizadas | null>(null);
 
+  // Efecto para cargar las noticias al montar el componente
   useEffect(() => {
-    const obtenerInformacion = async () => {
-      const respuesta = await obtenerNoticias();
-
-      const data = respuesta.map((n) => {
-        const titulo = n.titulo
-          .split(" ")
-          .map((str) => {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-          })
-          .join(" ");
-
-        const ahora = new Date();
-        const minutosTranscurridos = Math.floor(
-          (ahora.getTime() - n.fecha.getTime()) / 60000
-        );
-
-        return {
-          id: n.id,
-          titulo,
-          descripcion: n.descripcion,
-          fecha: `Hace ${minutosTranscurridos} minutos`,
-          esPremium: n.esPremium,
-          imagen: n.imagen,
-          descripcionCorta: n.descripcion.substring(0, 100),
-        };
-      });
-
-      setNoticias(data);
-    };
-
-    obtenerInformacion();
+    informacion().then((res) => setNoticias(res));
   }, []);
 
+  // Manejador de clic en una tarjeta de noticia para abrir el modal
+  const onClickTarjeta = (n: INoticiasNormalizadas) => {
+    setModal(n);
+  };
+
+  // Manejador de clic en el botón de cerrar del modal
+  const onClickCloseButton = () => {
+    setModal(null);
+  };
+
+  // Manejador de clic en el botón de suscribir del modal
+  const onClickModalSuscribir = () => {
+    // Simular una suscripción y cerrar el modal después de un segundo
+    setTimeout(() => {
+      alert("¡Suscripto!");
+      setModal(null);
+    }, 1000);
+  };
+
+  // Renderización del componente Noticias
   return (
-    <ContenedorNoticias>
-      <TituloNoticias>Noticias de los Simpsons</TituloNoticias>
-      <ListaNoticias>
-        {noticias.map((n) => (
-          <TarjetaNoticia>
-            <ImagenTarjetaNoticia src={n.imagen} />
-            <TituloTarjetaNoticia>{n.titulo}</TituloTarjetaNoticia>
-            <FechaTarjetaNoticia>{n.fecha}</FechaTarjetaNoticia>
-            <DescripcionTarjetaNoticia>
-              {n.descripcionCorta}
-            </DescripcionTarjetaNoticia>
-            <BotonLectura onClick={() => setModal(n)}>Ver más</BotonLectura>
-          </TarjetaNoticia>
-        ))}
-        {modal ? (
-          modal.esPremium ? (
-            <ContenedorModal>
-              <TarjetaModal>
-                <CloseButton onClick={() => setModal(null)}>
-                  <img src={Close} alt="close-button" />
-                </CloseButton>
-                <ImagenModal src={SuscribeImage} alt="mr-burns-excelent" />
-                <CotenedorTexto>
-                  <TituloModal>Suscríbete a nuestro Newsletter</TituloModal>
-                  <DescripcionModal>
-                    Suscríbete a nuestro newsletter y recibe noticias de
-                    nuestros personajes favoritos.
-                  </DescripcionModal>
-                  <BotonSuscribir
-                    onClick={() =>
-                      setTimeout(() => {
-                        alert("Suscripto!");
-                        setModal(null);
-                      }, 1000)
-                    }
-                  >
-                    Suscríbete
-                  </BotonSuscribir>
-                </CotenedorTexto>
-              </TarjetaModal>
-            </ContenedorModal>
-          ) : (
-            <ContenedorModal>
-              <TarjetaModal>
-                <CloseButton onClick={() => setModal(null)}>
-                  <img src={Close} alt="close-button" />
-                </CloseButton>
-                <ImagenModal src={modal.imagen} alt="news-image" />
-                <CotenedorTexto>
-                  <TituloModal>{modal.titulo}</TituloModal>
-                  <DescripcionModal>{modal.descripcion}</DescripcionModal>
-                </CotenedorTexto>
-              </TarjetaModal>
-            </ContenedorModal>
-          )
-        ) : null}
-      </ListaNoticias>
-    </ContenedorNoticias>
+    <Styled.ContenedorNoticias>
+      {/* Título de la sección de noticias */}
+      <Styled.TituloNoticias>Noticias de los Simpsons</Styled.TituloNoticias>
+      {/* Lista de tarjetas de noticias */}
+      <Styled.ListaNoticias>
+        {noticias !== null &&
+          noticias.map((n) => (
+            <TarjetaNoticia key={n.id} {...n} onClick={() => onClickTarjeta(n)} />
+          ))}
+        {/* Renderizar el modal si modal no es nulo */}
+        {modal !== null && (
+          <Modal
+            modal={modal}
+            setModal={setModal}
+            onClick={onClickCloseButton}
+            onClicKSuscribir={onClickModalSuscribir}
+          />
+        )}
+      </Styled.ListaNoticias>
+    </Styled.ContenedorNoticias>
   );
 };
 

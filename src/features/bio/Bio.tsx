@@ -1,48 +1,60 @@
 import { useState } from "react";
 import { NombresSimpsons, INFO_SIMPSONS } from "./constants";
-import styles from "./styles.module.css";
+import {
+  ButtonsContainer,
+  BioContainer,
+  BioDescription,
+  BioImage,
+  Button,
+  BioName
+} from "./styled";
 
+// Componente funcional Bio
 const Bio = () => {
+  // Estado para almacenar la información del personaje activo
   const [bioActiva, setBioActiva] = useState(
     INFO_SIMPSONS[NombresSimpsons.BART]
   );
 
+  // Función para manejar el clic en los botones y actualizar la bio activa
   const onClick: (nombre: NombresSimpsons) => void = (nombre) =>
     setBioActiva(INFO_SIMPSONS[nombre]);
 
+  /**
+   * Función que renderiza los botones con los nombres de los personajes
+   * y permite cambiar los estilos del botón del personaje seleccionado.
+   * @returns {HTMLElement}
+   */
   const crearBotones = () => {
     return Object.keys(INFO_SIMPSONS).map((nombre: string) => (
-      <button
+      <Button
         key={nombre as string}
         onClick={() => onClick(nombre as NombresSimpsons)}
-        className={
-          bioActiva.id === nombre
-            ? styles.botonBioActivo
-            : styles.botonBioInactivo
-        }
+        active={bioActiva.id === nombre}
       >
         {nombre}
-      </button>
+      </Button>
     ));
   };
 
+  // Renderización del componente Bio
   return (
-    <div className={styles.bioContainer}>
-      <div className={styles.contenedorBotones}>{crearBotones()}</div>
+    <BioContainer>
+      {/* Contenedor de los botones */}
+      <ButtonsContainer>{crearBotones()}</ButtonsContainer>
       <div>
         <div>
-          <img
-            src={bioActiva.image}
-            alt={bioActiva.nombre}
-            className={styles.bioImagen}
-          />
+          {/* Imagen del personaje */}
+          <BioImage src={bioActiva.image} alt={bioActiva.nombre} />
         </div>
         <div>
-          <h3 className={styles.bioNombre}>{bioActiva.nombre}</h3>
-          <p className={styles.bioDescripcion}>{bioActiva.descripcion}</p>
+          {/* Nombre del personaje */}
+          <BioName>{bioActiva.nombre}</BioName>
+          {/* Descripción del personaje */}
+          <BioDescription>{bioActiva.descripcion}</BioDescription>
         </div>
       </div>
-    </div>
+    </BioContainer>
   );
 };
 

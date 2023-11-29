@@ -4,6 +4,7 @@ import { ESTADO_FETCH } from "./constants";
 import { obtenerCita } from "./citaAPI";
 import { ICita } from "./types";
 
+
 export interface EstadoCita {
   data: ICita | null;
   estado: ESTADO_FETCH;
